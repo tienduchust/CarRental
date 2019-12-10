@@ -15,6 +15,7 @@ import { isNode } from '@Utils';
 import { NSerializeJson } from "nserializejson";
 import * as RoutesModule from './routes';
 
+
 function setupSession() {
     if (!isNode()) {
         Globals.reset();

@@ -9,13 +9,13 @@ import Loader from "@Components/shared/Loader";
 import Bind from "bind-decorator";
 import JsZip from "jszip";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
-import { Paper, Grid, withStyles, Button, Link } from "@material-ui/core";
+import { Paper, Grid, withStyles, Button, Link, Table, TableBody, TableHead, TableCell, TableRow } from "@material-ui/core";
 import { Sync } from '@material-ui/icons';
 
 const styles = (theme) => ({
     root: {
         flexGrow: 1,
-        '& label, button': {
+        '& label, button,th,td': {
             fontSize: 14,
             fontFamily: 'Roboto'
         }
@@ -33,7 +33,7 @@ const styles = (theme) => ({
 class ToCyberPage extends React.Component {
     pagingBar;
 
-    debouncedSearchFn;
+    debouncedBrowseFn;
     debouncedAddFn;
 
     constructor(props) {
@@ -44,47 +44,15 @@ class ToCyberPage extends React.Component {
             pageNum: 1,
             limitPerPage: 5,
             rowOffset: 0,
-            modelForEdit: {},
-            bookings: []
+            modelForEdit: {}
         };
 
-        this.debouncedSearchFn = AwesomeDebouncePromise(term => {
-            props.searchRequest(term);
-        },500);
+        this.debouncedBrowseFn = AwesomeDebouncePromise(() => {
+            props.browseRequest();
+        }, 500);
         this.debouncedAddFn = AwesomeDebouncePromise(model => {
             props.addRequest(model);
-        },500);
-    }
-
-    @Bind
-    onChangePage(pageNumber) {
-        let rowOffset = Math.ceil((pageNumber - 1) * this.state.limitPerPage);
-        this.setState({ pageNumber, rowOffset });
-    }
-
-    @Bind
-    renderRow(toCyber) {
-        return <tr key={toCyber.code}>
-            <td>{toCyber.code}</td>
-            <td>{toCyber.createdAt}</td>
-            <td>
-                <Link
-                    title="Nhập Cyber"
-                    component="button"
-                    variant="body2"
-                    onClick={e=>this.onAddToCyber(toCyber)}
-                >
-                    <Sync fontSize="large" />
-                </Link>
-            </td>
-        </tr>;
-    }
-
-    @Bind
-    renderRows(toCyberModels) {
-        return toCyberModels
-            .slice(this.state.rowOffset, this.state.rowOffset + this.state.limitPerPage)
-            .map(x => this.renderRow(x));
+        }, 500);
     }
 
     @Bind
@@ -92,10 +60,8 @@ class ToCyberPage extends React.Component {
         this.debouncedAddFn(model);
     }
     @Bind
-    onChangeSearchInput(event) {
-        let val = event.currentTarget.value;
-        this.debouncedSearchFn(val);
-        this.pagingBar.setFirstPage();
+    onBrowse() {
+        this.debouncedBrowseFn();
     }
     @Bind
     async onExtractZipFile(zip) {
@@ -122,9 +88,7 @@ class ToCyberPage extends React.Component {
         });
 
         Promise.all(promises).then(bookings => {
-            _this.setState({
-                bookings
-            });
+            _this.onAddToCyber(bookings)
         }).catch(e => {
             console.log("onExtractZipFile", e);
         });
@@ -132,8 +96,7 @@ class ToCyberPage extends React.Component {
 
     render() {
         const _this = this;
-        const { classes } = this.props;
-        const { bookings } = this.state;
+        const { classes, queue } = this.props;
         return (
             <div className={classes.root}>
                 <Helmet>
@@ -219,29 +182,72 @@ class ToCyberPage extends React.Component {
                                         />
                                     </Button>
                                 </Grid>
+                                <Grid item>
+                                    <Button
+                                        onClick={_this.onBrowse}
+                                        variant="contained"
+                                        component="label"
+                                    >
+                                        <Sync fontSize="large" />
+                                        REFRESH
+                                    </Button>
+                                </Grid>
                             </Grid>
                         </Paper>
                     </Grid>
                     <Grid item xs={12}>
                         <Paper className={classes.paper}>
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>CODE BOOKING</th>
-                                        <th>CREATED AT</th>
-                                        <th>HÀNH ĐỘNG</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {this.renderRows(bookings)}
-                                </tbody>
-                            </table>
-                            <PagingBar
-                                ref={x => this.pagingBar = x}
-                                totalResults={this.props.toCyber.length}
-                                limitPerPage={this.state.limitPerPage}
-                                currentPage={this.state.pageNum}
-                                onChangePage={this.onChangePage} />
+                            <Table className={classes.table} aria-label="simple table">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell align="left">MÃ BOOKING</TableCell>
+                                        <TableCell align="center">NGÀY TẠO</TableCell>
+                                        <TableCell align="center">TRẠNG THÁI</TableCell>
+                                        <TableCell align="center">DỮ LIỆU</TableCell>
+                                        <TableCell align="center">THỰC HIỆN</TableCell>
+                                        <TableCell align="center">HÀNH ĐỘNG</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {queue.map(row => {
+                                        let code = null;
+                                        let createdAt = null;
+                                        let json = null;
+                                        let executorName = null;
+                                        if (row && row.data) {
+                                            code = row.data.code;
+                                            createdAt = row.data.createdAt;
+                                            json = JSON.stringify(JSON.parse(row.data.json), null, 4);
+                                        }
+                                        if (row && row.executor) {
+                                            executorName = row.executor.name;
+                                        }
+                                        return (
+                                            <TableRow key={row.uuid}>
+                                                <TableCell component="th" scope="row">
+                                                    <code>{code}</code>
+                                                </TableCell>
+                                                <TableCell align="center">{createdAt}</TableCell>
+                                                <TableCell align="center">{row.status}</TableCell>
+                                                <TableCell align="center">
+                                                    <textarea value={json} style={{ width: '100%' }} cols="30" rows="5" />
+                                                </TableCell>
+                                                <TableCell align="center">{executorName}</TableCell>
+                                                <TableCell align="center">
+                                                    <Link
+                                                        title="Nhập Cyber"
+                                                        component="button"
+                                                        variant="body2"
+                                                        onClick={e => this.onAddToCyber(row)}
+                                                    >
+                                                        <Sync fontSize="large" />
+                                                    </Link>
+                                                </TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
+                                </TableBody>
+                            </Table>
                         </Paper>
                     </Grid>
                 </Grid>

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using Orchestrator.Models;
 using Orchestrator.Services;
 
@@ -16,10 +17,16 @@ namespace Orchestrator.Controllers
         }
 
         [HttpPost("[action]")]
-        public IActionResult Add(ToCyberModel model)
+        public IActionResult Add(List<ToCyberModel> models)
         {
-            var result = ToCyberService.Add(model);
-            return Json(result);
+            var result = ToCyberService.Add(models);
+            return Ok(result);
+        }
+        [HttpGet("[action]")]
+        public IActionResult Browse()
+        {
+            var result = ToCyberService.Browse();
+            return Ok(result);
         }
     }
 }

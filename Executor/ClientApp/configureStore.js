@@ -1,5 +1,6 @@
 import { createStore, applyMiddleware, compose, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
+import logger from 'redux-logger'
 import { routerMiddleware, LOCATION_CHANGE } from 'connected-react-router';
 import { reducers } from './store';
 
@@ -9,7 +10,7 @@ export default function configureStore(history, initialState) {
     // If devTools is installed, connect to it.
     const devToolsExtension = windowIfDefined && windowIfDefined.__REDUX_DEVTOOLS_EXTENSION__;
     const createStoreWithMiddleware = compose(
-        applyMiddleware(thunk, routerMiddleware(history)),
+        applyMiddleware(thunk,logger, routerMiddleware(history)),
         devToolsExtension ? devToolsExtension() : (next) => next
     )(createStore);
 

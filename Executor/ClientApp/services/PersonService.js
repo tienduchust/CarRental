@@ -34,4 +34,11 @@ export default class PersonService extends ServiceBase {
         });
         return result;
     }
+    static async peekUp() {
+        var result = await this.requestJson({
+            url: "/api/Executor/PeekUp/1",
+            method: "GET"
+        });
+        return result;
+    }
 }

@@ -30,8 +30,6 @@ const styles = (theme) => ({
 class ExecutorPage extends React.Component {
     pagingBar;
     debouncedSearchFn;
-    debouncedAddFn;
-
     constructor(props) {
         super(props);
 
@@ -44,10 +42,7 @@ class ExecutorPage extends React.Component {
 
         this.debouncedSearchFn = AwesomeDebouncePromise(term => {
             props.searchRequest(term);
-        }, 500);
-        this.debouncedAddFn = AwesomeDebouncePromise(model => {
-            props.addRequest(model);
-        }, 500);
+        }, 500)
     }
 
     @Bind
@@ -76,6 +71,9 @@ class ExecutorPage extends React.Component {
         let val = event.currentTarget.value;
         this.debouncedSearchFn(val);
         this.pagingBar.setFirstPage();
+    }
+    componentDidMount() {
+        this.debouncedSearchFn();
     }
 
     render() {

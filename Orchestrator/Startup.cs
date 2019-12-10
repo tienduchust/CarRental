@@ -28,20 +28,32 @@ namespace Orchestrator
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            var clients = new List<string> { "http://localhost:9000", "http://localhost:9001" };
             Configuration.GetSection("AppSettings").Bind(AppSettings.Default);
-
             services.AddLogging(loggingBuilder =>
                 loggingBuilder
                     .AddSerilog(dispose: true)
                     .AddAzureWebAppDiagnostics()
                 );
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddCors(opts =>
+            {
+                opts.AddPolicy("CorsPolicy",
+                    builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials()
+                        .WithOrigins(clients.ToArray()));
+            });
             services.AddNodeServices();
             services.AddSpaPrerenderer();
 
             // Add your own services here.
             services.AddScoped<AccountService>();
             services.AddScoped<PersonService>();
+            services.AddScoped<ExecutorService>();
+            services.AddScoped<ToCyberService>();
 
             return services.BuildServiceProvider();
         }
@@ -78,7 +90,6 @@ namespace Orchestrator
             }
 
             app.UseStaticFiles();
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

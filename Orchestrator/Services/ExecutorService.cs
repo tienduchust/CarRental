@@ -1,22 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Orchestrator.Infrastructure;
 using Orchestrator.Models;
+using Orchestrator.Services.Queue;
 
 namespace Orchestrator.Services
 {
     public class ExecutorService : ServiceBase
     {
-        protected static List<ExecutorModel> ExecutorList { get; }
-
         static ExecutorService()
         {
             ExecutorList = new List<ExecutorModel>
             {
-                new ExecutorModel(1, "MAI HƯƠNG", "http://localhost:́́́́́́́́́́́́́8890"),
-                new ExecutorModel(2, "THÙY CHI", "http://localhost:́́́́́́́́́́́́́8891")
+                new ExecutorModel(1, "MAI HƯƠNG", "http://localhost:́́́́́́́́́́́́́9001")
             };
         }
+
+        protected static List<ExecutorModel> ExecutorList { get; }
 
         public virtual Result<List<ExecutorModel>> Search(string term = null)
         {
@@ -27,89 +28,69 @@ namespace Orchestrator.Services
 
                 var result =
                     ExecutorList
-                    .Where(x =>
-                        x.Name.ToLower().Contains(term) || x.Ip.ToLower().Contains(term)
-                    )
-                    .ToList();
+                        .Where(x =>
+                            x.Name.ToLower().Contains(term) || x.Ip.ToLower().Contains(term)
+                        )
+                        .ToList();
 
                 return Ok(result);
             }
+
             return Ok(ExecutorList);
         }
 
-        //        public virtual Result<int> Add(PersonModel model)
-        //        {
-        //            if (model == null)
-        //                return Error<int>();
-        //            if (string.IsNullOrEmpty(model.FirstName))
-        //                return Error<int>("First name not defined.");
-        //            if (string.IsNullOrEmpty(model.LastName))
-        //                return Error<int>("Last name not defined.");
-        //
-        //            TrimStrings(model);
-        //
-        //            var personExists =
-        //                PeopleList
-        //                .Any(x =>
-        //                    x.FirstName == model.FirstName &&
-        //                    x.LastName == model.LastName
-        //                    );
-        //            if (personExists)
-        //            {
-        //                return Error<int>("Person with the same first name and last name already exists.");
-        //            }
-        //
-        //            var newId = PeopleList.Max(x => x?.Id ?? 0) + 1;
-        //            model.Id = newId;
-        //
-        //            PeopleList.Add(model);
-        //
-        //            return Ok(model.Id);
-        //        }
-        //
-        //        public virtual Result Update(PersonModel model)
-        //        {
-        //            if (model == null)
-        //                return Error();
-        //            if (model.Id <= 0)
-        //                return Error($"{model.Id} <= 0.");
-        //            var person = PeopleList.Where(x => x.Id == model.Id).FirstOrDefault();
-        //            if (person == null)
-        //                return Error($"Person with id = {model.Id} not found.");
-        //
-        //            TrimStrings(model);
-        //
-        //            var personExists =
-        //                PeopleList
-        //                .Any(x =>
-        //                    x.Id != model.Id &&
-        //                    x.FirstName == model.FirstName &&
-        //                    x.LastName == model.LastName
-        //                    );
-        //            if (personExists)
-        //            {
-        //                return Error("Person with the same first name and last name already exists.");
-        //            }
-        //
-        //            person.FirstName = model.FirstName;
-        //            person.LastName = model.LastName;
-        //
-        //            return Ok();
-        //        }
-        //
-        //        public virtual Result Delete(int id)
-        //        {
-        //            var unit = PeopleList.Where(x => x.Id == id).FirstOrDefault();
-        //            if (unit == null)
-        //                return Error($"Can't find person with Id = {id}.");
-        //            PeopleList.Remove(unit);
-        //            return Ok();
-        //        }
-        //
-        //        private static void TrimStrings(PersonModel model)
-        //        {
-        //            model.FirstName = model.FirstName.Trim();
-        //            model.LastName = model.LastName.Trim();
-        //        }
+        public virtual Result<QueueModel<ToCyberModel>> PeekUp(int id)
+        {
+            var executor = ExecutorList.FirstOrDefault(x => x.Id == id);
+            if (executor == null)
+            {
+                return Error<QueueModel<ToCyberModel>>(Constants.UnAuthorizedExecutor);
+            }
+            if (RequestQueue<ToCyberModel>.Queue.IsEmpty || RequestQueue<ToCyberModel>.Queue.Count == 0)
+            {
+                return Error<QueueModel<ToCyberModel>>(Constants.QueueEmpty);
+            }
+
+            bool isPicked = false;
+            QueueModel<ToCyberModel> model;
+            do
+            {
+                var isDequeue = RequestQueue<ToCyberModel>.Queue.TryDequeue(out model);
+                if ((model.StatusId == (int) Constants.QueueStatus.Standby ||
+                    model.StatusId == (int) Constants.QueueStatus.Error) && isDequeue)
+                {
+                    isPicked = true;
+                    model.StatusId = (int) Constants.QueueStatus.Executing;
+                    model.Status = nameof(Constants.QueueStatus.Executing);
+                    model.Executor = executor;
+                    RequestQueue<ToCyberModel>.Queue.Enqueue(model);
+                }
+            } while (!isPicked);
+
+            if (!string.IsNullOrEmpty(model.Uuid.ToString()))
+            {
+                return Ok(model);
+            }
+            return Error<QueueModel<ToCyberModel>>(Constants.PeekUpQueueFailed);
+        }
+//        public virtual Result<List<ExecutorModel>> FinishUp(Guid queueUuid)
+//        {
+//            if (!string.IsNullOrEmpty(term))
+//            {
+//                term = term.ToLower();
+//                term = term.Trim();
+//
+//                var result =
+//                    ExecutorList
+//                        .Where(x =>
+//                            x.Name.ToLower().Contains(term) || x.Ip.ToLower().Contains(term)
+//                        )
+//                        .ToList();
+//
+//                return Ok(result);
+//            }
+//
+//            return Ok(ExecutorList);
+//        }
     }
 }

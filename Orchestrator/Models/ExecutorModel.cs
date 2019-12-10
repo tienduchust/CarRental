@@ -2,9 +2,9 @@
 {
     public class ExecutorModel
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Ip { get; set; }
+        public int Id { get; }
+        public string Name { get; }
+        public string Ip { get; }
 
         public ExecutorModel(int id, string name, string ip)
         {

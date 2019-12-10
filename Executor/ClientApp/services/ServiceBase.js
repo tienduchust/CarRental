@@ -1,6 +1,6 @@
 ﻿import { Ui } from "@Ui";
 import Result from "@Models/Result";
-import Axios, { AxiosRequestConfig } from "axios";
+import Axios from "axios";
 import { transformUrl } from "domain-wait";
 import jsonToUrl from "json-to-url";
 import { isNode } from "@Utils";
@@ -29,14 +29,17 @@ export default class ServiceBase {
             return url;
         };
 
-        var axiosRequestConfig;
+        var axiosRequestConfig = {
+            baseURL:'http://localhost:9000',
+        };
 
         if (isNode()) {
             // Make SSR requests 'authorized' from the NodeServices to the web server.
             axiosRequestConfig = {
                 headers: {
                     Cookie: Globals.getSession().private.cookie
-                }
+                },
+                baseURL:'http://localhost:9000'
             }
         }
 
