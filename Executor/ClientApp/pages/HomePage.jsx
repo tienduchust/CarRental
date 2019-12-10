@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Helmet } from "react-helmet";
-import logo from "@Images/logo.png";
 
 export default class HomePage extends React.Component {
     constructor(props) {
@@ -10,7 +9,7 @@ export default class HomePage extends React.Component {
     render() {
         return <div>
             <Helmet>
-                <title>Home page - RCB (JavaScript)</title>
+                <title>Home page - CAR RENTAL</title>
             </Helmet>
             {/* <img style={{"margin": "0 auto", "display": "block", "width": "100%"}} src={logo} /> */}
             

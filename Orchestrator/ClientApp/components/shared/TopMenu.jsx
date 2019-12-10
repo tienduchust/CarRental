@@ -50,7 +50,7 @@ class TopMenu extends React.Component {
                     <ul className="nav navbar-nav">
                         <li><NavLink exact to={'/'} activeClassName="active">Home</NavLink></li>
                         <li><NavLink exact to={'/executor'} activeClassName="active">Executor</NavLink></li>
-                        <li><NavLink exact to={'/toCyber'} activeClassName="active">To Cyber</NavLink></li>
+                        <li><NavLink exact to={'/orchestrator'} activeClassName="active">To Cyber</NavLink></li>
                         <li className="dropdown">
                             <a href="#" ref={x => this.elDropdown = x} className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                                 {Globals.serviceUser.login}&nbsp;

@@ -1,39 +1,39 @@
 ﻿import { clone } from "@Utils";
-import ToCyberService from "@Services/ToCyberService";
+import OrchestratorService from "@Services/OrchestratorService";
 import { wait } from "domain-wait";
 
 const actions = {
-    FailureResponse: "EXECUTOR_FAILURE_RESPONSE",
-    EnqueueRequest: "ENQUEUE_REQUEST",
-    EnqueueResponse: "ENQUEUE_RESPONSE",
-    BrowseRequest: "BROWSE_REQUEST",
-    BrowseResponse: "BROWSE_RESPONSE"
+    FailureResponse: "ORCHESTRATOR_FAILURE_RESPONSE",
+    EnqueueListRequest: "ENQUEUE_LIST_REQUEST",
+    EnqueueListResponse: "ENQUEUE_LIST_RESPONSE",
+    BrowseQueueRequest: "BROWSE_QUEUE_REQUEST",
+    BrowseQueueResponse: "BROWSE_QUEUE_RESPONSE"
 };
 
 export const actionCreators = {
-    addRequest: (models) => async (dispatch, getState) => {
+    enqueueListRequest: (models) => async (dispatch, getState) => {
         await wait(async (transformUrl) => {
             // Wait for server prerendering.
-            dispatch({ type: actions.EnqueueRequest });
+            dispatch({ type: actions.EnqueueListRequest });
 
-            let result = await ToCyberService.add(models);
+            let result = await OrchestratorService.EnqueueList(models);
 
             if (!result.hasErrors) {
-                dispatch({ type: actions.EnqueueResponse, payload: result.value });
+                dispatch({ type: actions.EnqueueListResponse, payload: result.value });
             } else {
                 dispatch({ type: actions.FailureResponse });
             }
         });
     },
-    browseRequest: (models) => async (dispatch, getState) => {
+    browseQueueRequest: () => async (dispatch, getState) => {
         await wait(async (transformUrl) => {
             // Wait for server prerendering.
-            dispatch({ type: actions.BrowseRequest });
+            dispatch({ type: actions.BrowseQueueRequest });
 
-            let result = await ToCyberService.browse();
+            let result = await OrchestratorService.browseQueue();
 
             if (!result.hasErrors) {
-                dispatch({ type: actions.BrowseResponse, payload: result.value });
+                dispatch({ type: actions.BrowseQueueResponse, payload: result.value });
             } else {
                 dispatch({ type: actions.FailureResponse });
             }
@@ -58,17 +58,17 @@ export const reducer = (currentState, incomingAction) => {
         case actions.FailureResponse:
             indicators.operationLoading = false;
             return { ...currentState, indicators };
-        case actions.EnqueueRequest:
+        case actions.EnqueueListRequest:
             indicators.operationLoading = true;
             return { ...currentState, indicators };
-        case actions.EnqueueResponse:
+        case actions.EnqueueListResponse:
             indicators = cloneIndicators();
             indicators.operationLoading = false;
             return { ...currentState, indicators, queue: action.payload };
-        case actions.BrowseRequest:
+        case actions.BrowseQueueRequest:
             indicators.operationLoading = true;
             return { ...currentState, indicators };
-        case actions.BrowseResponse:
+        case actions.BrowseQueueResponse:
             indicators = cloneIndicators();
             indicators.operationLoading = false;
             return { ...currentState, indicators, queue: action.payload };

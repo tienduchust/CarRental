@@ -51,9 +51,7 @@ namespace Orchestrator
 
             // Add your own services here.
             services.AddScoped<AccountService>();
-            services.AddScoped<PersonService>();
-            services.AddScoped<ExecutorService>();
-            services.AddScoped<ToCyberService>();
+            services.AddScoped<OrchestratorService>();
 
             return services.BuildServiceProvider();
         }

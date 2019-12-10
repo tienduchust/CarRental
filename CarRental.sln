@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Orchestrator", "Orchestrator\Orchestrator.csproj", "{0280B87F-B616-4243-B7A2-552696EE4FA5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orchestrator", "Orchestrator\Orchestrator.csproj", "{0280B87F-B616-4243-B7A2-552696EE4FA5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Executor", "Executor\Executor.csproj", "{0D47C03A-4909-4064-A892-1DE724D49ADB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Executor", "Executor\Executor.csproj", "{0D47C03A-4909-4064-A892-1DE724D49ADB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Model\Model.csproj", "{134CBC1C-985A-462A-8C4D-FE82F17C9A70}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{0D47C03A-4909-4064-A892-1DE724D49ADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D47C03A-4909-4064-A892-1DE724D49ADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D47C03A-4909-4064-A892-1DE724D49ADB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{134CBC1C-985A-462A-8C4D-FE82F17C9A70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{134CBC1C-985A-462A-8C4D-FE82F17C9A70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{134CBC1C-985A-462A-8C4D-FE82F17C9A70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{134CBC1C-985A-462A-8C4D-FE82F17C9A70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

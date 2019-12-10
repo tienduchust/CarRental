@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Model.Executor;
 
-namespace Orchestrator.Models
+namespace Model.Queue
 {
     public class QueueModel<T>
     {

@@ -1,11 +1,13 @@
 ﻿import { clone } from "@Utils";
-import ExecutorService from "@Services/ExecutorService";
+import OrchestratorService from "@Services/OrchestratorService";
 import { wait } from "domain-wait";
 
 const actions = {
     FailureResponse: "EXECUTOR_FAILURE_RESPONSE",
-    SearchRequest: "EXECUTOR_SEARCH_REQUEST",
-    SearchResponse: "EXECUTOR_SEARCH_RESPONSE"
+    BrowseOrchestratorsRequest: "BROWSE_ORCHESTRATORS_REQUEST",
+    BrowseOrchestratorsResponse: "BROWSE_ORCHESTRATORS_RESPONSE",
+    BrowseOrchestratorRequest: "BROWSE_ORCHESTRATOR_REQUEST",
+    BrowseOrchestratorResponse: "BROWSE_ORCHESTRATOR_RESPONSE"
 };
 
 export const actionCreators = {

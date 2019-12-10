@@ -49,7 +49,8 @@ namespace Executor
 
             // Add your own services here.
             services.AddScoped<AccountService>();
-            services.AddScoped<PersonService>();
+//            services.AddScoped<ExecutorService>();
+            services.AddScoped<HttpService>();
 
             return services.BuildServiceProvider();
         }

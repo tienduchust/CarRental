@@ -2,22 +2,22 @@
 import * as React from "react";
 import { Helmet } from "react-helmet";
 import { withRouter } from "react-router";
-import * as ToCyberStore from "@Store/ToCyberStore";
+import * as OrchestratorStore from "@Store/OrchestratorStore";
 import { connect } from "react-redux";
-import { PagingBar } from "@Components/shared/PagingBar";
 import Loader from "@Components/shared/Loader";
 import Bind from "bind-decorator";
 import JsZip from "jszip";
 import AwesomeDebouncePromise from "awesome-debounce-promise";
-import { Paper, Grid, withStyles, Button, Link, Table, TableBody, TableHead, TableCell, TableRow } from "@material-ui/core";
-import { Sync } from '@material-ui/icons';
+import { Paper, Grid, withStyles, Button, Link, Table, TableBody, TableHead, TableCell, TableRow } from
+    "@material-ui/core";
+import { Sync } from "@material-ui/icons";
 
 const styles = (theme) => ({
     root: {
         flexGrow: 1,
         '& label, button,th,td': {
             fontSize: 14,
-            fontFamily: 'Roboto'
+            fontFamily: "Roboto"
         }
     },
     paper: {
@@ -30,11 +30,10 @@ const styles = (theme) => ({
     }
 });
 
-class ToCyberPage extends React.Component {
-    pagingBar;
+class OrchestratorPage extends React.Component {
+    debouncedBrowseQueueFn;
 
-    debouncedBrowseFn;
-    debouncedAddFn;
+    debouncedEnqueueListFn;
 
     constructor(props) {
         super(props);
@@ -47,34 +46,35 @@ class ToCyberPage extends React.Component {
             modelForEdit: {}
         };
 
-        this.debouncedBrowseFn = AwesomeDebouncePromise(() => {
-            props.browseRequest();
-        }, 500);
-        this.debouncedAddFn = AwesomeDebouncePromise(model => {
-            props.addRequest(model);
-        }, 500);
+        this.debouncedBrowseQueueFn = AwesomeDebouncePromise(() => {
+                props.browseQueueRequest();
+            },
+            500);
+        this.debouncedEnqueueListFn = AwesomeDebouncePromise(model => {
+                props.enqueueListRequest(model);
+            },
+            500);
     }
 
-    @Bind
-    onAddToCyber(model) {
-        this.debouncedAddFn(model);
+    onEnqueueList = (model)=> {
+        this.debouncedEnqueueListFn(model);
     }
-    @Bind
-    onBrowse() {
-        this.debouncedBrowseFn();
+
+    onBrowseQueue = () => {
+        this.debouncedBrowseQueueFn();
     }
-    @Bind
-    async onExtractZipFile(zip) {
+
+    onExtractZipFile = async (zip) => {
         const _this = this;
-        let promises = [];
-        zip.forEach(function (relativePath, zipEntry) { // 2) print entries
+        const promises = [];
+        zip.forEach(function(relativePath, zipEntry) { // 2) print entries
             promises.push(new Promise((resolve, reject) => {
-                let booking = zipEntry.async("string")
-                    .then(function (data) {
-                        let nameChar = zipEntry.name.split(".");
+                const booking = zipEntry.async("string")
+                    .then(function(data) {
+                        const nameChar = zipEntry.name.split(".");
                         if (nameChar.length > 2) {
-                            let createdAtStr = nameChar[nameChar.length - 2];
-                            let code = zipEntry.name.replace(`.${createdAtStr}.json`, "");
+                            const createdAtStr = nameChar[nameChar.length - 2];
+                            const code = zipEntry.name.replace(`.${createdAtStr}.json`, "");
                             return {
                                 code: code,
                                 createdAt: createdAtStr,
@@ -88,11 +88,11 @@ class ToCyberPage extends React.Component {
         });
 
         Promise.all(promises).then(bookings => {
-            _this.onAddToCyber(bookings)
+            _this.onEnqueueList(bookings);
         }).catch(e => {
             console.log("onExtractZipFile", e);
         });
-    }
+    };
 
     render() {
         const _this = this;
@@ -100,9 +100,9 @@ class ToCyberPage extends React.Component {
         return (
             <div className={classes.root}>
                 <Helmet>
-                    <title>TO CYBER - CAR RENTAL</title>
+                    <title>ORCHESTRATOR - CAR RENTAL</title>
                 </Helmet>
-                <Loader show={this.props.indicators.operationLoading} />
+                <Loader show={this.props.indicators.operationLoading}/>
                 <Grid container spacing={3}>
                     <Grid item xs={12}>
                         <Paper className={classes.paper}>
@@ -110,85 +110,81 @@ class ToCyberPage extends React.Component {
                                 <Grid item>
                                     <Button
                                         variant="contained"
-                                        component="label"
-                                    >
+                                        component="label">
                                         Upload File
                                         <input
                                             onChange={e => {
-                                                let files = e.target.files;
+                                                const files = e.target.files;
                                                 if (files && files.length > 0) {
                                                     JsZip.loadAsync(files[0])
-                                                        .then(async function (zip) {
-                                                            _this.onExtractZipFile(zip);
-                                                        }, function (e) {
-                                                            console.log("Upload File", e);
-                                                        });
+                                                        .then(async function(zip) {
+                                                                _this.onExtractZipFile(zip);
+                                                            },
+                                                            function(e) {
+                                                                console.log("Upload File", e);
+                                                            });
                                                 }
                                             }}
                                             type="file"
                                             multiple={false}
                                             accept=".zip"
-                                            style={{ display: "none" }}
-                                        />
+                                            style={{ display: "none" }}/>
                                     </Button>
                                 </Grid>
                                 <Grid item>
                                     <Button
                                         variant="contained"
-                                        component="label"
-                                    >
+                                        component="label">
                                         Import all
                                         <input
                                             onChange={e => {
-                                                let files = e.target.files;
+                                                const files = e.target.files;
                                                 if (files && files.length > 0) {
                                                     JsZip.loadAsync(files[0])
-                                                        .then(async function (zip) {
-                                                            _this.onExtractZipFile(zip);
-                                                        }, function (e) {
-                                                            console.log("Upload File", e);
-                                                        });
+                                                        .then(async function(zip) {
+                                                                _this.onExtractZipFile(zip);
+                                                            },
+                                                            function(e) {
+                                                                console.log("Upload File", e);
+                                                            });
                                                 }
                                             }}
                                             type="file"
                                             multiple={false}
                                             accept=".zip"
-                                            style={{ display: "none" }}
-                                        />
+                                            style={{ display: "none" }}/>
                                     </Button>
                                 </Grid>
                                 <Grid item>
                                     <Button
                                         variant="contained"
-                                        component="label"
-                                    >
+                                        component="label">
                                         Import selection
                                         <input
                                             onChange={e => {
-                                                let files = e.target.files;
+                                                const files = e.target.files;
                                                 if (files && files.length > 0) {
                                                     JsZip.loadAsync(files[0])
-                                                        .then(async function (zip) {
-                                                            _this.onExtractZipFile(zip);
-                                                        }, function (e) {
-                                                            console.log("Upload File", e);
-                                                        });
+                                                        .then(async function(zip) {
+                                                                _this.onExtractZipFile(zip);
+                                                            },
+                                                            function(e) {
+                                                                console.log("Upload File", e);
+                                                            });
                                                 }
                                             }}
                                             type="file"
                                             multiple={false}
                                             accept=".zip"
-                                            style={{ display: "none" }}
-                                        />
+                                            style={{ display: "none" }}/>
                                     </Button>
                                 </Grid>
                                 <Grid item>
                                     <Button
-                                        onClick={_this.onBrowse}
+                                        onClick={_this.onBrowseQueue}
                                         variant="contained"
-                                        component="label"
-                                    >
-                                        <Sync fontSize="large" />
+                                        component="label">
+                                        <Sync fontSize="large"/>
                                         REFRESH
                                     </Button>
                                 </Grid>
@@ -230,7 +226,7 @@ class ToCyberPage extends React.Component {
                                                 <TableCell align="center">{createdAt}</TableCell>
                                                 <TableCell align="center">{row.status}</TableCell>
                                                 <TableCell align="center">
-                                                    <textarea value={json} style={{ width: '100%' }} cols="30" rows="5" />
+                                                    <textarea value={json} style={{ width: "100%" }} cols="30" rows="5" />
                                                 </TableCell>
                                                 <TableCell align="center">{executorName}</TableCell>
                                                 <TableCell align="center">
@@ -238,13 +234,12 @@ class ToCyberPage extends React.Component {
                                                         title="Nhập Cyber"
                                                         component="button"
                                                         variant="body2"
-                                                        onClick={e => this.onAddToCyber(row)}
-                                                    >
-                                                        <Sync fontSize="large" />
+                                                        onClick={e => this.onAddToCyber(row)}>
+                                                        <Sync fontSize="large"/>
                                                     </Link>
                                                 </TableCell>
                                             </TableRow>
-                                        )
+                                        );
                                     })}
                                 </TableBody>
                             </Table>
@@ -256,8 +251,8 @@ class ToCyberPage extends React.Component {
 }
 
 let component = connect(
-    state => state.toCyber, // Selects which state properties are merged into the component's props.
-    ToCyberStore.actionCreators // Selects which action creators are merged into the component's props.
-)(withStyles(styles)(ToCyberPage));
+    state => state.orchestrator, // Selects which state properties are merged into the component's props.
+    OrchestratorStore.actionCreators // Selects which action creators are merged into the component's props.
+)(withStyles(styles)(OrchestratorPage));
 
 export default (withRouter(component));

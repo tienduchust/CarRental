@@ -2,7 +2,7 @@
 import Result from "@Models/Result";
 import Axios, { AxiosRequestConfig } from "axios";
 import { transformUrl } from "domain-wait";
-import jsonToUrl from "json-to-url";
+import JsonToUrl from "json-to-url";
 import { isNode } from "@Utils";
 import Globals from "@Globals";
 
@@ -24,7 +24,7 @@ export default class ServiceBase {
 
         var processQuery = (url, data) => {
             if (data) {
-                return `${url}?${jsonToUrl(data)}`;
+                return `${url}?${JsonToUrl(data)}`;
             }
             return url;
         };
