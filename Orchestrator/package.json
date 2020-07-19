@@ -57,7 +57,7 @@
     "history": "4.9.0",
     "json-to-url": "1.0.5",
     "jszip": "^3.2.2",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "moment": "^2.24.0",
     "nserializejson": "^1.0.2",
     "nval-tippy": "^1.0.38",
