@@ -58,7 +58,7 @@
     "json-to-url": "1.0.5",
     "jszip": "^3.2.2",
     "lodash": "^4.17.15",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "nserializejson": "^1.0.2",
     "nval-tippy": "^1.0.38",
     "react": "16.8.6",
